@@ -7,7 +7,7 @@ storiesOf("Diagram", module).add("SRP - Logic", () => ({
     const diagramModel = new Diagram.Model();
 
     const node1 = diagramModel.addNode("t", 300, 200);
-    const inPort = node1.addInPort("test");
+    const inPort = node1.addInPort("testxxxxxxxxxx");
 
     const node2 = diagramModel.addNode("test", 10, 320, 144, 80);
     const node2OutPort = node2.addOutPort("testOut");
@@ -22,6 +22,8 @@ storiesOf("Diagram", module).add("SRP - Logic", () => ({
     const node4OutPort = node4.addOutPort("testOut4");
     // node4.color = "#cc6600";
     // node4.deletable = false;
+
+    diagramModel.addNode("u", 300, 280);
 
     diagramModel.addLink(node2OutPort, inPort);
     diagramModel.addLink(node3OutPort, inPort);
@@ -62,8 +64,42 @@ storiesOf("Diagram", module).add("SRP - Logic", () => ({
       newNode.addInPort({ title: "Alarm ID", connectorCategory: "N" });
       newNode.addInPort({ isASpacer: true, title: "in - spacer" });
       newNode.addOutPort({ isASpacer: true, title: "out - spacer" });
-      newNode.addInPort({ title: "", connectorCategory: "A" });
-      newNode.addInPort({ title: "" });
+      newNode.addInPort({
+        title: "Deletable - Editable",
+        connectorCategory: "D",
+        deletable: true,
+        editable: true
+      });
+      newNode.addInPort({
+        title: "Not deletable - Editable",
+        connectorCategory: "N",
+        deletable: false,
+        editable: true
+      });
+      newNode.addInPort({
+        title: "Deletable - Non Editable",
+        connectorCategory: "D",
+        deletable: true,
+        editable: false
+      });
+      newNode.addInPort({
+        title: "Not deletable - Non Editable",
+        connectorCategory: "N",
+        deletable: false,
+        editable: false
+      });
+      newNode.addInPort({
+        title: "D+E",
+        connectorCategory: "+",
+        deletable: true,
+        editable: true
+      });
+      newNode.addInPort({
+        title: "D+EE",
+        connectorCategory: "+",
+        deletable: true,
+        editable: true
+      });
 
       newNode.addOutPort({
         title: "Logic A",
@@ -88,24 +124,35 @@ storiesOf("Diagram", module).add("SRP - Logic", () => ({
       // newNode.color = "#cc6600";
       // newNode.deletable = false;
     },
-    selectNode(node) {
-      this.console.log("selectNode:");
-      this.console.log(node);
+    selectNode(node, item) {
+      this.console.log("selectNode: " + node.title + " // " + item.index);
     },
-    svgReset() {
-      this.model.svgReset();
+    configurePort(node, port) {
+      this.console.log(
+        "configurePort - Node (" +
+          node.title +
+          ") - Port: (" +
+          port.type +
+          ") " +
+          port.name
+      );
     }
   }, // methods
   template: `<div style="background-color: #423661; background-image: radial-gradient(#413561, #473d58);">
     <div>
       <div>
-        <diagram :model="model" width="800" height="400" @SelectNode="selectNode"></diagram>
+        <diagram
+          :model="model"
+          width="800"
+          height="400"
+          @selectNode="selectNode"
+          @configurePort="configurePort"
+        ></diagram>
         <button @click="console.log(model.serialize())">serialize</button>
         <button @click="model.deserialize(serializedModel)">deserialize</button>
         <button @click="model.deserialize(serialisedConf_1)">deserialize Conf 1</button>
         <input v-model="newNodeName" type="text" name="newName"/>
         <button @click="addNode">Add Node</button>
-        <button @click="svgReset">Reset View</button>
       </div>
       <hr>
       <input v-model="serializedModel" type="text" size="250" style="background-color: rgb(76 67 99);" />
