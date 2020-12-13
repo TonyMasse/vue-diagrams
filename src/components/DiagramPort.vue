@@ -1,7 +1,7 @@
 <template>
   <g v-if="!isASpacer">
     <svg :y="y + 55" v-if="type === 'in'">
-      <path opacity="0.8" :fill="connectorNameTagColor" stroke="none" @click="configurePort" style="cursor: pointer"
+      <path opacity="0.8" :fill="connectorNameTagColor" stroke="none" @click="isOptionsPanelVisible = !isOptionsPanelVisible" style="cursor: pointer"
         v-if="name.length"
         filter="url(#filter_gaus_20)"
         :d="`
@@ -11,9 +11,9 @@
           a 9.5 9.5 0 0 0 0 -19
           h ${(portNameWidth + 25) * -1}
           z `" />
-      <text :x="30" :y="9 + fontSize / 2" :font-size="`${fontSize}pt`" :fill="connectorNameTextColor" @click="configurePort" style="cursor: pointer">{{name}}</text>
-      <path opacity="1" :fill="connectorNameTagColor" stroke="none" @click="isOptionsPanelVisible = false" style="cursor: pointer"
-        v-if="isOptionsPanelVisible"
+      <text :x="30" :y="9 + fontSize / 2" :font-size="`${fontSize}pt`" :fill="connectorNameTextColor" @click="isOptionsPanelVisible = !isOptionsPanelVisible" style="cursor: pointer">{{name}}</text>
+      <path opacity="1" fill="#000000" stroke="none" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && deletable && editable"
         filter="url(#filter_gaus_20)"
         :d="`
           M 5 0
@@ -22,8 +22,19 @@
           a 9.5 9.5 0 0 0 0 -19
           h -40
           z `" />
-      <path opacity="1" :fill="connectorNameTagColor" stroke="none" @click="isOptionsPanelVisible = false" style="cursor: pointer"
-        v-if="isOptionsPanelVisible"
+      <path opacity="1" :fill="tagDeleteFill" stroke="none" @click="deletePort" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && deletable && editable"
+        filter="url(#filter_gaus_20)"
+        :d="`
+          M 5 0.5
+          v 18
+          h 40
+          a 9 9 0 0 0 0 -18
+          h -40
+          z `" />
+      <text :x="42" :y="9 + fontSize / 2" v-if="isOptionsPanelVisible && deletable && editable" :font-size="`${fontSize}pt`" :fill="tagDeleteTextColor" @click="deletePort" style="cursor: pointer">x</text>
+      <path opacity="1" fill="#000000" stroke="none" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && (editable || deletable)"
         filter="url(#filter_gaus_20)"
         :d="`
           M 5 0
@@ -32,6 +43,18 @@
           a 9.5 9.5 0 0 0 0 -19
           h -25
           z `" />
+      <path opacity="1" :fill="(editable ? tagEditFill : tagDeleteFill)" stroke="none" @click="(editable ? configurePort() : deletePort())" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && (editable || deletable)"
+        filter="url(#filter_gaus_20)"
+        :d="`
+          M 5 0.5
+          v 18
+          h 25
+          a 9 9 0 0 0 0 -18
+          h -25
+          z `" />
+      <text :x="27" :y="9 + fontSize / 2" v-if="isOptionsPanelVisible && !editable && deletable" :font-size="`${fontSize}pt`" :fill="tagDeleteTextColor" @click="deletePort" style="cursor: pointer">x</text>
+      <text :x="27" :y="9 + fontSize / 2" v-if="isOptionsPanelVisible && editable" :font-size="`${fontSize}pt`" :fill="tagEditTextColor" @click="configurePort" style="cursor: pointer">e</text>
       <path opacity=".6" stroke="none"
         filter="url(#filter_gaus_20)"
         fill="#00000"
@@ -57,7 +80,7 @@
       <text :x="10" :y="9 + fontSize / 2" :font-size="`${fontSize}pt`" :fill="connectorCategoryTextColor" style="cursor: crosshair" @mouseenter="enter" @mouseleave="leave" @mousedown="startDragNewLink" @mouseup="mouseup">{{ connectorCategory }}</text>
     </svg>
     <svg :y="y + 55" v-if="type === 'out'">
-      <path opacity="0.8" :fill="connectorNameTagColor" stroke="none" @click="configurePort" style="cursor: pointer"
+      <path opacity="0.8" :fill="connectorNameTagColor" stroke="none" @click="isOptionsPanelVisible = !isOptionsPanelVisible" style="cursor: pointer"
         v-if="name.length"
         filter="url(#filter_gaus_20)"
         :d="`
@@ -67,6 +90,54 @@
           v -19
           h ${(portNameWidth + 25) * -1}
           z `" />
+      <text :x="nodeWidth - portNameWidth - 20" :y="9 + fontSize / 2" :font-size="`${fontSize}pt`" :font-family="fontFamily" :fill="connectorNameTextColor" @click="isOptionsPanelVisible = !isOptionsPanelVisible" style="cursor: pointer">{{name}}</text>
+
+      <path opacity="1" fill="#000000" stroke="none" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && deletable && editable"
+        filter="url(#filter_gaus_20)"
+        :d="`
+          M ${nodeWidth - 35} 0
+          a 9.5 9.5 0 0 0 0 19
+          h 40
+          v -19
+          h -40
+          z `" />
+      <path opacity="1" :fill="tagDeleteFill" stroke="none" @click="deletePort" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && deletable && editable"
+        filter="url(#filter_gaus_20)"
+        :d="`
+          M ${nodeWidth - 35} 0.5
+          a 9 9 0 0 0 0 18
+          h 40
+          v -18
+          h -40
+          z `" />
+      <text :x="nodeWidth - 20 - 18" :y="9 + fontSize / 2" v-if="isOptionsPanelVisible && deletable && editable" :font-size="`${fontSize}pt`" :fill="tagDeleteTextColor" @click="deletePort" style="cursor: pointer">x</text>
+      <path opacity="1" fill="#000000" stroke="none" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && (editable || deletable)"
+        filter="url(#filter_gaus_20)"
+        :d="`
+          M ${nodeWidth - 20} 0
+          a 9.5 9.5 0 0 0 0 19
+          h 25
+          v -19
+          h -25
+          z `" />
+      <path opacity="1" :fill="(editable ? tagEditFill : tagDeleteFill)" stroke="none" @click="(editable ? configurePort() : deletePort())" style="cursor: pointer"
+        v-if="isOptionsPanelVisible && (editable || deletable)"
+        filter="url(#filter_gaus_20)"
+        :d="`
+          M ${nodeWidth - 20} 0.5
+          a 9 9 0 0 0 0 18
+          h 25
+          v -18
+          h -25
+          z `" />
+      <text :x="nodeWidth - 20 - 3" :y="9 + fontSize / 2" v-if="isOptionsPanelVisible && !editable && deletable" :font-size="`${fontSize}pt`" :fill="tagDeleteTextColor" @click="deletePort" style="cursor: pointer">x</text>
+      <text :x="nodeWidth - 20 - 3" :y="9 + fontSize / 2" v-if="isOptionsPanelVisible && editable" :font-size="`${fontSize}pt`" :fill="tagEditTextColor" @click="configurePort" style="cursor: pointer">e</text>
+
+
+
       <path opacity=".6" stroke="none"
         filter="url(#filter_gaus_20)"
         fill="#00000"
@@ -89,7 +160,6 @@
           v -18
           h -10
           z `" />
-      <text :x="nodeWidth - portNameWidth - 20" :y="9 + fontSize / 2" :font-size="`${fontSize}pt`" :font-family="fontFamily" :fill="connectorNameTextColor" @click="configurePort" style="cursor: pointer">{{name}}</text>
       <text :x="nodeWidth - 7" :y="9 + fontSize / 2" :font-size="`${fontSize}pt`" :font-family="fontFamily" :fill="connectorCategoryTextColor" style="cursor: crosshair" @mouseenter="enter" @mouseleave="leave" @mousedown="startDragNewLink" @mouseup="mouseup">{{ connectorCategory }}</text>
       <!-- <text :x="nodeWidth - 12" y="9" font-size="8pt" fill="#000000" @click="deletePort" style="cursor: pointer">x</text> -->
     </svg>
@@ -175,6 +245,10 @@ export default {
       type: Boolean,
       default: true
     },
+    editable: {
+      type: Boolean,
+      default: true
+    },
     isASpacer: {
       type: Boolean,
       default: false
@@ -183,16 +257,31 @@ export default {
   data() {
     return {
       fill: "#b0b0ff",
-      isOptionsPanelVisible: false
+      isOptionsPanelVisible: false,
+      tagEditFill: "#D0FFD0",
+      tagDeleteFill: "#FFD0D0",
+      tagEditTextColor: "#000000",
+      tagDeleteTextColor: "#000000"
     };
   },
   computed: {
     portNameWidth() {
+      const minWidth = 30;
+      var width = 0;
       if (this.fontSize && this.fontFamily.length) {
-        return getTextWidth(this.name, this.fontSize + "pt " + this.fontFamily);
+        width = getTextWidth(
+          this.name,
+          this.fontSize + "pt " + this.fontFamily
+        );
       } else {
-        return this.name.length * 10;
+        width = this.name.length * 10;
       }
+
+      if (width < minWidth) {
+        width = minWidth;
+      }
+
+      return width;
     }
   }, // computed
   methods: {
@@ -211,13 +300,12 @@ export default {
       this.$emit("onStartDragNewLink", this.id);
     },
     deletePort: function() {
-      console.log("deletePort");
+      this.isOptionsPanelVisible = false;
       this.$emit("delete");
     },
     configurePort: function() {
-      console.log("configurePort");
+      this.isOptionsPanelVisible = false;
       this.$emit("configure");
-      this.isOptionsPanelVisible = true; // XXXXX
     }
   },
   mounted() {

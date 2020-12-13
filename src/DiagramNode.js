@@ -77,6 +77,7 @@ class DiagramNode {
       id: generateId(),
       type: type,
       deletable: undefined,
+      editable: undefined,
       isASpacer: undefined,
       fontSize: 8,
       fontFamily: "sans-serif",
@@ -92,9 +93,10 @@ class DiagramNode {
       newPort.object = object;
       newPort.name = object.title;
       newPort.deletable = object.deletable;
+      newPort.editable = object.editable;
       newPort.isASpacer = object.isASpacer;
-      newPort.fontSize = object.fontSize;
-      newPort.fontFamily = object.fontFamily;
+      newPort.fontSize = object.fontSize ? object.fontSize : 8;
+      newPort.fontFamily = object.fontFamily ? object.fontFamily : "sans-serif";
       newPort.connectorCategory = object.connectorCategory;
       newPort.connectorCategoryTextColor = object.connectorCategoryTextColor;
       newPort.connectorCategoryTagColor = object.connectorCategoryTagColor;
@@ -120,7 +122,11 @@ class DiagramNode {
     let maxWidthIn = 0;
     let maxWidthOut = 0;
     let portWidth = 0;
-    const widthMargin = 70 + 5;
+    const minPortWidth = 65;
+    const portMargin = 30;
+    // const widthMargin = 70 + 5;
+    const widthMargin = 20;
+    const minWidth = 70 + 5;
 
     // Check the width required for the Title
     let newWidth =
@@ -133,18 +139,35 @@ class DiagramNode {
 
     // Check the width required for the longest In and Out ports
     this.ports.forEach(p => {
-      portWidth = getTextWidth(p.name, p.fontSize + "pt " + p.fontFamily);
+      if (p.isASpacer !== true) {
+        portWidth =
+          portMargin +
+          getTextWidth(
+            p.name,
+            (p.fontSize ? p.fontSize : 8) +
+              "pt " +
+              (p.fontFamily ? p.fontFamily : "sans-serif")
+          );
 
-      if (p.type === "in" && portWidth > maxWidthIn) {
-        maxWidthIn = portWidth;
-      }
-      if (p.type === "out" && portWidth > maxWidthOut) {
-        maxWidthOut = portWidth;
+        // To reserve the space for the option panel, which opens within the space of the port tag
+        if (portWidth < minPortWidth) {
+          portWidth = minPortWidth;
+        }
+        if (p.type === "in" && portWidth > maxWidthIn) {
+          maxWidthIn = portWidth;
+        }
+        if (p.type === "out" && portWidth > maxWidthOut) {
+          maxWidthOut = portWidth;
+        }
       }
     });
 
     if (this.width < maxWidthIn + maxWidthOut + widthMargin) {
       this.width = maxWidthIn + maxWidthOut + widthMargin;
+    }
+
+    if (this.width < minWidth) {
+      this.width = minWidth;
     }
   }
 }

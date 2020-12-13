@@ -124,6 +124,7 @@
             :type="port.type"
             :name="port.name"
             :deletable="port.deletable"
+            :editable="port.editable"
             :isASpacer="port.isASpacer"
             :fontSize="port.fontSize"
             :fontFamily="port.fontFamily"
@@ -148,6 +149,7 @@
             :type="port.type"
             :name="port.name"
             :deletable="port.deletable"
+            :editable="port.editable"
             :isASpacer="port.isASpacer"
             :fontSize="port.fontSize"
             :fontFamily="port.fontFamily"
@@ -421,7 +423,7 @@ export default {
       this.initialDragY = y;
       if (item.type === "nodes") {
         // this.$emit("SelectNode", { index: item.index, nodeObject: item.nodeObject });
-        this.$emit("SelectNode", item);
+        this.$emit("selectNode", this.model._model.nodes[item.index], item);
       }
     },
 
