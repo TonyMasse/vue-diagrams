@@ -127,7 +127,7 @@ export default {
     },
     color: {
       type: String,
-      default: "#505050"
+      default: "#707070"
     },
     backgroundColor: {
       type: String,
