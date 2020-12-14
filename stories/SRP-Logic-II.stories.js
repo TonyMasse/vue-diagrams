@@ -216,6 +216,8 @@ storiesOf("Diagram", module).add("SRP - Logic - II", () => ({
       console,
       serializedModel: diagramModel.serialize(),
       model: diagramModel,
+      killLinks: false,
+      killPoints: false,
       newNodeName: "SRP - Open Case",
       newNodeColor: "#f2f207",
       newNodeIconPath:
@@ -381,6 +383,8 @@ storiesOf("Diagram", module).add("SRP - Logic - II", () => ({
           :model="model"
           width="1200"
           height="600"
+          :killLinksMode="killLinks"
+          :killLinkPointsMode="killPoints"
           @selectNode="selectNode"
           @configurePort="configurePort"
         ></diagram>
@@ -392,6 +396,8 @@ storiesOf("Diagram", module).add("SRP - Logic - II", () => ({
         <input v-model="newNodeIconPath" type="text" name="newNodeIconPath"/>
         <input v-model="newNodeIconColor" type="text" name="newNodeIconColor"/>
         <button @click="addNode">Add Node</button>
+        <button @click="killLinks = !killLinks">Set "Link killing" mode to "{{ !killLinks }}"</button>
+        <button @click="killPoints = !killPoints">Set "Point killing" mode to "{{ !killPoints }}"</button>
       </div>
       <hr>
       <input v-model="serializedModel" type="text" size="250" style="background-color: rgb(76 67 99);" />
