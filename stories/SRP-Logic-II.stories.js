@@ -381,8 +381,9 @@ storiesOf("Diagram", module).add("SRP - Logic - II", () => ({
       <div>
         <diagram
           :model="model"
-          width="1200"
-          height="600"
+          :width="800"
+          :height="400"
+          :fitFlex="false"
           :killLinksMode="killLinks"
           :killLinkPointsMode="killPoints"
           @selectNode="selectNode"
