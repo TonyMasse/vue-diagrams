@@ -56,6 +56,7 @@ class DiagramModel {
       }
     }
     this._model.nodes.splice(index, 1);
+    // this.$emit('onAfterDeleteNode', { deletedIndex: index}); // FIX ME: no idea how to emit something from here (lame, I know, sorry)
   }
 
   /**
@@ -71,11 +72,60 @@ class DiagramModel {
       }
     }
     node.ports.splice(index, 1);
+    // this.$emit('onAfterDeletePort', { deletedIndex: index}); // FIX ME: no idea how to emit something from here (lame, I know, sorry)
   }
 
   deleteLink(link) {
-    const index = this._model.links.indexOf(link);
-    this._model.links.splice(index, 1);
+    var index = -1;
+    // This can be called from different places.
+    // In some cases it's the whole link array element, and in some others it's an object looking like this:
+    // {type: "points", linkIndex: 4, pointIndex: 0}
+    if (
+      typeof link.linkIndex !== "undefined" &&
+      typeof link.pointIndex !== "undefined"
+    ) {
+      // The second type of cases
+      index = link.linkIndex;
+    } else {
+      // The array element type of cases
+      index = this._model.links.indexOf(link);
+    }
+
+    if (index >= 0 && index < this._model.links.length) {
+      this._model.links.splice(index, 1);
+    }
+    // this.$emit('onAfterDeleteLink', { deletedIndex: index}); // FIX ME: no idea how to emit something from here (lame, I know, sorry)
+  }
+
+  deletePoint(linkPoint) {
+    var linkIndex = -1;
+    var pointIndex = -1;
+    // linkPoint will look like this:
+    // {type: "points", linkIndex: 4, pointIndex: 2}
+    if (
+      typeof linkPoint.linkIndex !== "undefined" &&
+      typeof linkPoint.pointIndex !== "undefined"
+    ) {
+      linkIndex = linkPoint.linkIndex;
+      pointIndex = linkPoint.pointIndex;
+    }
+
+    if (
+      linkIndex >= 0 &&
+      pointIndex >= 0 &&
+      linkIndex < this._model.links.length
+    ) {
+      if (typeof this._model.links[linkIndex].points !== "undefined") {
+        if (pointIndex < this._model.links[linkIndex].points.length) {
+          this._model.links[linkIndex].points.splice(pointIndex, 1);
+        }
+      }
+    } /* else {
+      console.warn(
+        "deletePoint() - Link or Point not found or out of boundaries."
+      );
+    } */
+    // this.$emit('onAfterDeleteLinkPoint', { linkIndex: linkIndex, deletedIndex: pointIndex}); // FIX ME: no idea how to emit something from here (lame, I know, sorry)
   }
 
   /**

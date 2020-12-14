@@ -15,7 +15,7 @@
       @mouseleave="mouseLeave"
       @mousedown="$emit('mousedown', $event)"
       :cx="x" :cy="y" r="3"
-      :fill="hover ? hoverStrokeStyle : normalStrokeStyle"
+      :fill="fillColor"
       filter="url(#filter_gaus_40)"
       />
       <!-- :fill="rgba(0,0,0,.3)" -->
@@ -34,6 +34,20 @@
 export default {
   name: "DiagramPoint",
   props: ["x", "y"],
+  props: {
+    x: {},
+    y: {},
+    killLinkPointsMode: {},
+    normalColor: {
+      default: "rgba(255, 255, 255, 0.75)"
+    },
+    hoverColor: {
+      default: "rgba(100, 100, 255, 1)"
+    },
+    hoverKillColor: {
+      default: "rgba(255, 0, 0, 0.75)"
+    }
+  },
   data() {
     return {
       hover: false,
@@ -47,6 +61,18 @@ export default {
     },
     mouseLeave() {
       this.hover = false;
+    }
+  },
+  computed: {
+    fillColor() {
+      var newColor = this.normalColor;
+      if (this.hover) {
+        newColor = this.hoverColor;
+        if (this.killLinkPointsMode) {
+          newColor = this.hoverKillColor;
+        }
+      }
+      return newColor;
     }
   }
 };

@@ -1,7 +1,7 @@
 <template>
   <div>
    <SvgPanZoom
-      :style="{ width: width + 'px', height: height + 'px', border:'1px solid black', cursor: (newLink ? 'crosshair' : 'default')}"
+      :style="{ width: width + 'px', height: height + 'px', border:'1px solid black', cursor: (newLink || killLinksMode || killLinkPointsMode ? 'crosshair' : 'default')}"
       xmlns="http://www.w3.org/2000/svg"
       :zoomEnabled="zoomEnabled"
       id="svgroot"
@@ -12,6 +12,7 @@
       viewportSelector="#svgroot2"
       :preventMouseEventsDefault="false"
       :beforePan="beforePan"
+      @svgpanzoom="registerSvgPanZoom"
       >
     <svg
       id="svgroot2"
@@ -67,16 +68,24 @@
 
       <rect x="-5000px" y="-5000px" width="10000px" height="10000px" fill="url(#grid)" @drop="onDrop($event)" @dragover.prevent @dragenter.prevent @mousedown="clearSelection" ref="grid" class="svg-pan-zoom_viewport"/>
       <g ref="viewPort" id="viewport" x="50" y="50">
+	  <circle cx="0" cy="0" r="10" fill="white"/>
         <DiagramLink
           :ref="'link-' + index"
           :positionFrom="link.positionFrom"
           :positionTo="link.positionTo"
           :points="link.points"
+          :killLinksMode="killLinksMode"
+          :killLinkPointsMode="killLinkPointsMode"
+          :normalStroke="(link.normalStroke ? link.normalStroke : defaultLinksNormalStroke)"
+          :hoverStroke="(link.hoverStroke ? link.hoverStroke : defaultLinksHoverStroke)"
+          :hoverKillStroke="(link.hoverKillStroke ? link.hoverKillStroke : defaultLinksHoverKillStroke)"
           :id="link.id"
           :index="index"
           v-for="(link, index) in model._model.links"
           @onStartDrag="startDragPoint"
           @onCreatePoint="createPoint"
+          @onDeletePoint="deletePoint"
+          @onDeleteLink="deleteLink"
         />
         <line
           :x1="getPortHandlePosition(newLink.startPortId).x - 5"
@@ -235,7 +244,18 @@ export default {
     },
     gridSnap: {
       default: 1
-    }
+    },
+    killLinksMode: {
+      // Set to TRUE to signify that clicking on a Link should trigger its deletion
+      default: false
+    },
+    killLinkPointsMode: {
+      // Set to TRUE to signify that clicking on a Link's Point should trigger its deletion
+      default: false
+    },
+    defaultLinksNormalStroke: {},
+    defaultLinksHoverStroke: {},
+    defaultLinksHoverKillStroke: {}
   },
 
   data() {
@@ -245,6 +265,7 @@ export default {
       document,
       zoomEnabled: true,
       panEnabled: true,
+      svgPanZoom: null,
       draggedItem: undefined,
       selectedItem: {},
       initialDragX: 0,
@@ -272,10 +293,21 @@ export default {
       let ctm = rec.getCTM().inverse();
       return point.matrixTransform(ctm);
     },
+
     beforePan() {
       if (this.selectedItem.type || this.draggedItem || this.newLink)
         return false;
       else return true;
+    },
+
+    registerSvgPanZoom(svgPanZoom) {
+      this.svgPanZoom = svgPanZoom;
+    },
+
+    center() {
+      if (this.svgPanZoom !== null) {
+        this.svgPanZoom.center();
+      }
     },
 
     createPoint(x, y, linkIndex, pointIndex) {
@@ -288,6 +320,16 @@ export default {
       var points = links[linkIndex].points;
       points.splice(pointIndex, 0, coords);
       links[linkIndex].points = points;
+    },
+
+    deletePoint(payload = { linkIndex: undefined, pointIndex: undefined }) {
+      this.$emit("onBeforeDeletePoint", payload);
+      console.log("onBeforeDeletePoint");
+    },
+
+    deleteLink(payload = { linkIndex: undefined }) {
+      this.$emit("onBeforeDeleteLink", payload);
+      console.log("onBeforeDeleteLink");
     },
 
     clearSelection() {
@@ -412,8 +454,8 @@ export default {
             id: generateId(),
             from: port2.id,
             to: port1.id,
-            positionFrom: {},
-            positionTo: {},
+            positionFrom: { x: 0, y: 0 },
+            positionTo: { x: 0, y: 0 },
             points: []
           });
         } else if (port2.type === "in" && port1.type === "out") {
@@ -421,8 +463,8 @@ export default {
             id: generateId(),
             from: port1.id,
             to: port2.id,
-            positionFrom: {},
-            positionTo: {},
+            positionFrom: { x: 0, y: 0 },
+            positionTo: { x: 0, y: 0 },
             points: []
           });
         } else {
@@ -437,7 +479,14 @@ export default {
 
     startDragPoint(pointInfo) {
       console.log("startDragPoint", pointInfo);
-      this.draggedItem = pointInfo;
+      // Killing Link takes priority over killing Point, as deleting the Link will delete its points too
+      if (this.huntingKillingLinks) {
+        this.model.deleteLink(pointInfo);
+      } else if (this.huntingKillingLinkPoints) {
+        this.model.deletePoint(pointInfo);
+      } else {
+        this.draggedItem = pointInfo;
+      }
     },
 
     startDragItem(item, x, y) {
@@ -479,6 +528,22 @@ export default {
   computed: {
     querySelector: function() {
       return document.querySelector("#viewport");
+    },
+    huntingKillingLinks: {
+      get() {
+        return this.killLinksMode;
+      },
+      set(value) {
+        this.$emit("switchKillLinksMode", value);
+      }
+    },
+    huntingKillingLinkPoints: {
+      get() {
+        return this.killLinkPointsMode;
+      },
+      set(value) {
+        this.$emit("switchKillLinkPointsMode", value);
+      }
     }
   },
 

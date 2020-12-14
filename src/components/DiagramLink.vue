@@ -20,10 +20,11 @@
         <line
           :x1="index === 0 ? x1 : points[index - 1].x" :y1="index === 0 ? y1 : points[index - 1].y"
           :x2="point.x" :y2="point.y"
-          :style="isHighlighted ? hoverStrokeStyle : normalStrokeStyle"
+          :stroke="lineStroke"
           stroke-width="1"
           filter="url(#filter_gaus_30)"
         />
+        <!-- :style="isHighlighted ? hoverStrokeStyle : normalStrokeStyle" -->
       </g>
       <g
         @mousedown="mouseDownSegment($event, points.length)"
@@ -38,7 +39,7 @@
         <line
           :x1="points[points.length - 1].x" :y1="points[points.length - 1].y"
           :x2="x2" :y2="y2"
-          :style="isHighlighted ? hoverStrokeStyle : normalStrokeStyle"
+          :stroke="lineStroke"
           stroke-width="1"
           filter="url(#filter_gaus_30)"
         />
@@ -62,7 +63,7 @@
         />
         <path
           :d="curve"
-          :style="isHighlighted ? hoverStrokeStyle : normalStrokeStyle"
+          :stroke="lineStroke"
           stroke-width="1"
           filter="url(#filter_gaus_30)"
           fill="none"
@@ -75,6 +76,10 @@
       @mouseleave="mouseLeavePoint(point)"
       @mousedown="mouseDownPoint($event, pointIndex)"
       :x="point.x" :y="point.y"
+      :normalColor="normalStroke"
+      :hoverColor="hoverStroke"
+      :hoverKillColor="hoverKillStroke"
+      :killLinkPointsMode="killLinkPointsMode"
       />
   </g>
 </template>
@@ -83,7 +88,24 @@ import DiagramPoint from "./DiagramPoint";
 
 export default {
   name: "DiagramLink",
-  props: ["positionFrom", "positionTo", "id", "index", "points"],
+  props: {
+    positionFrom: {},
+    positionTo: {},
+    id: {},
+    index: {},
+    points: {},
+    killLinksMode: {},
+    killLinkPointsMode: {},
+    normalStroke: {
+      default: "rgba(255, 255, 255, 0.75)"
+    },
+    hoverStroke: {
+      default: "rgba(100, 100, 255, 1)"
+    },
+    hoverKillStroke: {
+      default: "rgba(255, 0, 0, 0.75)"
+    }
+  },
 
   components: {
     DiagramPoint
@@ -91,22 +113,14 @@ export default {
 
   data() {
     return {
-      largeStrokeStyle: "stroke:rgba(255,0,0,0.0);",
-      pointStyleNormal: "stroke:rgba(255,0,0,0.0); stroke-width: 6",
-      pointStyleHover: "stroke:rgba(255,0,0,0.5); stroke-width: 6",
-
-      isHighlighted: false,
-      normalStrokeStyle: "stroke:rgba(255,255,255,.75);",
-      hoverStrokeStyle: "stroke:rgba(255,0,0,.75);"
+      isHighlighted: false
     };
   },
   methods: {
     mouseEnter() {
-      this.largeStrokeStyle = "stroke:rgba(255,0,0,0.5);";
       this.isHighlighted = true;
     },
     mouseLeave() {
-      this.largeStrokeStyle = "stroke:rgba(255,0,0,0.0);";
       this.isHighlighted = false;
     },
     mouseDownPoint(pos, pointIndex) {
@@ -153,6 +167,26 @@ export default {
       var path = `M${x1},${y1} C${x1 + distance},${y1} ${x2 -
         distance},${y2} ${x2},${y2}`;
       return path;
+    },
+    lineStrokeStyle() {
+      var newStrokeStyle = this.normalStrokeStyle;
+      if (this.isHighlighted) {
+        newStrokeStyle = this.hoverStrokeStyle;
+        if (this.killLinksMode) {
+          newStrokeStyle = this.hoverKillStrokeStyle;
+        }
+      }
+      return newStrokeStyle;
+    },
+    lineStroke() {
+      var newStroke = this.normalStroke;
+      if (this.isHighlighted) {
+        newStroke = this.hoverStroke;
+        if (this.killLinksMode) {
+          newStroke = this.hoverKillStroke;
+        }
+      }
+      return newStroke;
     }
   }
 };
