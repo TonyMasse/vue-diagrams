@@ -1,12 +1,12 @@
 <template>
   <div>
    <SvgPanZoom
-      :style="{ width: width + 'px', height: height + 'px', border:'1px solid black', cursor: (newLink || killLinksMode || killLinkPointsMode ? 'crosshair' : 'default')}"
+      :style="{ width: (fitFlexbox ? '100%' : width + 'px' ), height: (fitFlexbox ? '' : height + 'px'), border:'1px solid black', cursor: (newLink || killLinksMode || killLinkPointsMode ? 'crosshair' : 'default')}"
       xmlns="http://www.w3.org/2000/svg"
       :zoomEnabled="zoomEnabled"
       id="svgroot"
       :panEnabled="panEnabled"
-      :controlIconsEnabled="true"
+      :controlIconsEnabled="controlIconsEnabled"
       :fit="false"
       :center="true"
       viewportSelector="#svgroot2"
@@ -18,9 +18,9 @@
       id="svgroot2"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
-      :viewBox="'0 0 ' + width + ' ' + height"
-      :width="width"
-      :height="height"
+      :viewBox="'0 0 ' + (fitFlexbox ? '500' : width) + ' ' + (fitFlexbox ? '500' : height)"
+      :width="(fitFlexbox ? '100%' : width)"
+      :height="(fitFlexbox ? '100%' : height)"
       preserveAspectRatio="xMinYMin meet"
       class="svg-content"
       ref="dragramRoot"
@@ -68,7 +68,6 @@
 
       <rect x="-5000px" y="-5000px" width="10000px" height="10000px" fill="url(#grid)" @drop="onDrop($event)" @dragover.prevent @dragenter.prevent @mousedown="clearSelection" ref="grid" class="svg-pan-zoom_viewport"/>
       <g ref="viewPort" id="viewport" x="50" y="50">
-	  <circle cx="0" cy="0" r="10" fill="white"/>
         <DiagramLink
           :ref="'link-' + index"
           :positionFrom="link.positionFrom"
@@ -241,6 +240,12 @@ export default {
     },
     height: {
       default: 500
+    },
+    fitFlexbox: {
+      default: false
+    },
+    controlIconsEnabled: {
+      default: true
     },
     gridSnap: {
       default: 1
