@@ -105,7 +105,23 @@
           :width="node.width"
           :height="node.height"
           :color="node.color"
+          :backgroundColor="node.backgroundColor"
+          :backgroundOpacity="node.backgroundOpacity"
+          :borderColor="node.borderColor"
+          :borderColorSelected="node.borderColorSelected"
+          :titleTextColor="node.titleTextColor"
+          :titleBarColor="node.titleBarColor"
+          :titleBarFillOpacity="node.titleBarFillOpacity"
+          :titleBarTopLeftAreaColor="node.titleBarTopLeftAreaColor"
+          :titleBarTopLeftAreaFillOpacity="node.titleBarTopLeftAreaFillOpacity"
+          :titleBarTopLeftAreaSeparatorColor="node.titleBarTopLeftAreaSeparatorColor"
+          :titleBarTopLeftAreaSeparatorFillOpacity="node.titleBarTopLeftAreaSeparatorFillOpacity"
           :deletable="node.deletable"
+          :configurable="node.configurable"
+          :topLeftArea="node.topLeftArea"
+          :topLeftAreaContent="node.topLeftAreaContent"
+          :configureButtonColor="node.configureButtonColor"
+          :readOnly="node.readOnly"
           :ports="node.ports"
           :selected="selectedItem.type === 'nodes' && selectedItem.index === nodeIndex"
           :index="nodeIndex"
@@ -114,6 +130,9 @@
           @delete="model.deleteNode(node)"
           @drop="onDropNode($event, node)"
         >
+          <!-- <template v-slot:topLeftAreaContent>
+            `${node.topLeftAreaContent}`
+          </template> -->
           <DiagramPort
             v-for="(port, portIndex) in node.ports.filter(p => p.type === 'in')"
             :ref="'port-' + port.id"
@@ -136,6 +155,9 @@
             :connectorNameTextColor="port.connectorNameTextColor"
             @onStartDragNewLink="startDragNewLink"
             @mouseUpPort="mouseUpPort"
+            @click="clickPort(node, port)"
+            @openOptionsPanel="openPortOptionsPanel(node, port)"
+            @closeOptionsPanel="closePortOptionsPanel(node, port)"
             @delete="model.removePort(node, port)"
             @configure="configurePort(node, port)"
           />
@@ -161,6 +183,9 @@
             :connectorNameTextColor="port.connectorNameTextColor"
             @onStartDragNewLink="startDragNewLink"
             @mouseUpPort="mouseUpPort"
+            @click="clickPort(node, port)"
+            @openOptionsPanel="openPortOptionsPanel(node, port)"
+            @closeOptionsPanel="closePortOptionsPanel(node, port)"
             @delete="model.removePort(node, port)"
             @configure="configurePort(node, port)"
           />
@@ -437,6 +462,18 @@ export default {
 
     configurePort(node, port) {
       this.$emit("configurePort", node, port);
+    },
+
+    clickPort(node, port) {
+      this.$emit("clickPort", node, port);
+    },
+
+    openPortOptionsPanel(node, port) {
+      this.$emit("openPortOptionsPanel", node, port);
+    },
+
+    closePortOptionsPanel(node, port) {
+      this.$emit("closePortOptionsPanel", node, port);
     }
   },
   computed: {

@@ -36,6 +36,27 @@ class DiagramNode {
     if (typeof object === "object") {
       this.object = object;
       this.title = object.title;
+      this.color = object.color;
+      this.backgroundColor = object.backgroundColor;
+      this.backgroundOpacity = object.backgroundOpacity;
+      this.borderColor = object.borderColor;
+      this.borderColorSelected = object.borderColorSelected;
+      this.titleTextColor = object.titleTextColor;
+      this.titleBarColor = object.titleBarColor;
+      this.titleBarFillOpacity = object.titleBarFillOpacity;
+      this.titleBarTopLeftAreaColor = object.titleBarTopLeftAreaColor;
+      this.titleBarTopLeftAreaFillOpacity =
+        object.titleBarTopLeftAreaFillOpacity;
+      this.titleBarTopLeftAreaSeparatorColor =
+        object.titleBarTopLeftAreaSeparatorColor;
+      this.titleBarTopLeftAreaSeparatorFillOpacity =
+        object.titleBarTopLeftAreaSeparatorFillOpacity;
+      this.deletable = object.deletable;
+      this.configurable = object.configurable;
+      this.topLeftArea = object.topLeftArea;
+      this.topLeftAreaContent = object.topLeftAreaContent;
+      this.configureButtonColor = object.configureButtonColor;
+      this.readOnly = object.readOnly;
     } else {
       this.title = object;
     }
@@ -79,8 +100,10 @@ class DiagramNode {
       deletable: undefined,
       editable: undefined,
       isASpacer: undefined,
-      fontSize: 8,
-      fontFamily: "sans-serif",
+      // fontSize: 8,
+      // fontFamily: "sans-serif",
+      fontSize: undefined,
+      fontFamily: undefined,
       connectorCategory: "",
       connectorCategoryTextColor: undefined,
       connectorCategoryTagColor: undefined,
@@ -95,8 +118,8 @@ class DiagramNode {
       newPort.deletable = object.deletable;
       newPort.editable = object.editable;
       newPort.isASpacer = object.isASpacer;
-      newPort.fontSize = object.fontSize ? object.fontSize : 8;
-      newPort.fontFamily = object.fontFamily ? object.fontFamily : "sans-serif";
+      newPort.fontSize = object.fontSize;
+      newPort.fontFamily = object.fontFamily;
       newPort.connectorCategory = object.connectorCategory;
       newPort.connectorCategoryTextColor = object.connectorCategoryTextColor;
       newPort.connectorCategoryTagColor = object.connectorCategoryTagColor;
@@ -125,14 +148,19 @@ class DiagramNode {
     const minPortWidth = 65;
     const portMargin = 30;
     // const widthMargin = 70 + 5;
+    const topLeftAreaMargin = this.topLeftArea ? 24 : 0;
+    const topRightAreaMargin =
+      (this.deletable === false ? 0 : 14) +
+      (this.configurable === false ? 0 : 14);
     const widthMargin = 20;
     const minWidth = 70 + 5;
 
     // Check the width required for the Title
     let newWidth =
-      getTextWidth(this.title, "bold 14pt sans-serif") * 0.85 +
+      getTextWidth(this.title, "14pt bold sans-serif") * 0.9 +
       20 /* for the thickness and spaces around */ +
-      14; /* for the Delete/Close button */
+      topLeftAreaMargin /* for the top left area where some icon might be */ +
+      topRightAreaMargin; /* for the Config/Edit and Delete/Close buttons */
     if (this.width < newWidth) {
       this.width = newWidth;
     }
