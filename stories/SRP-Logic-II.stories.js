@@ -161,6 +161,7 @@ storiesOf("Diagram", module).add("SRP - Logic - II", () => ({
     const node4 = diagramModel.addNode(
       {
         title: "Action: SRP - Cisco ISE - Isolate Computer on Hostname",
+        id: "uid-xyz-cisco-ise",
         // color: '',
         topLeftArea: true,
         titleBarTopLeftAreaColor: "#fc5e03",
@@ -174,6 +175,7 @@ storiesOf("Diagram", module).add("SRP - Logic - II", () => ({
 
     const node4in1 = node4.addInPort({
       title: "Logic",
+      id: "uid-xyz-node-Logic-cisco-ise",
       connectorCategory: "L",
       connectorCategoryTagColor: "#BF5000",
       connectorCategoryTagColorHover: "#AB4700",
