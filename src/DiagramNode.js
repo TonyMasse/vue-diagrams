@@ -139,7 +139,7 @@ class DiagramNode {
   }
 
   /**
-   * Recalculate the width of the node based on its ports sizes.
+   * Recalculate the width of the node based on its ports sizes and titles.
    */
   recalculateNodeWidth() {
     let maxWidthIn = 0;
