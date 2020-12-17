@@ -30,42 +30,87 @@ class DiagramNode {
    * @param  {Integer} y      [description]
    * @param  {Integer} width  [description]
    * @param  {Integer} height [description]
-   * @param  {Integer} id [description]
+   * @param  {String} id [description]
    */
   constructor(id, object, x, y, width, height) {
-    if (typeof object === "object") {
-      this.object = object;
-      this.title = object.title;
-      this.color = object.color;
-      this.backgroundColor = object.backgroundColor;
-      this.backgroundOpacity = object.backgroundOpacity;
-      this.borderColor = object.borderColor;
-      this.borderColorSelected = object.borderColorSelected;
-      this.titleTextColor = object.titleTextColor;
-      this.titleBarColor = object.titleBarColor;
-      this.titleBarFillOpacity = object.titleBarFillOpacity;
-      this.titleBarTopLeftAreaColor = object.titleBarTopLeftAreaColor;
-      this.titleBarTopLeftAreaFillOpacity =
-        object.titleBarTopLeftAreaFillOpacity;
-      this.titleBarTopLeftAreaSeparatorColor =
-        object.titleBarTopLeftAreaSeparatorColor;
-      this.titleBarTopLeftAreaSeparatorFillOpacity =
-        object.titleBarTopLeftAreaSeparatorFillOpacity;
-      this.deletable = object.deletable;
-      this.configurable = object.configurable;
-      this.topLeftArea = object.topLeftArea;
-      this.topLeftAreaContent = object.topLeftAreaContent;
-      this.configureButtonColor = object.configureButtonColor;
-      this.readOnly = object.readOnly;
-    } else {
-      this.title = object;
-    }
+    this.id = id;
     this.x = x;
     this.y = y;
 
     this.width = width ? width : 10;
     this.height = height ? height : 10;
     this.ports = [];
+
+    if (typeof object === "object") {
+      if (
+        typeof object.id !== "undefined" &&
+        (this.id === null || typeof this.id === "undefined")
+      ) {
+        this.id = object.id;
+      }
+      const propertiesToMoveIn = [
+        "title",
+        "color",
+        "backgroundColor",
+        "backgroundOpacity",
+        "borderColor",
+        "borderColorSelected",
+        "titleTextColor",
+        "titleBarColor",
+        "titleBarFillOpacity",
+        "titleBarTopLeftAreaColor",
+        "titleBarTopLeftAreaFillOpacity",
+        "titleBarTopLeftAreaSeparatorColor",
+        "titleBarTopLeftAreaSeparatorFillOpacity",
+        "deletable",
+        "configurable",
+        "topLeftArea",
+        "configureButtonColor",
+        "readOnly",
+        "topLeftAreaContent"
+      ];
+
+      this.object = {};
+
+      for (var objectItem in object) {
+        if (propertiesToMoveIn.indexOf(objectItem) >= 0) {
+          // objectItem IS in propertiesToMoveIn
+          this[objectItem] = object[objectItem];
+        } else {
+          // objectItem IS NOT in propertiesToMoveIn
+          this.object[objectItem] = object[objectItem];
+        }
+      }
+
+      // this.title = object.title;
+      // this.color = object.color;
+      // this.backgroundOpacity = object.backgroundOpacity;
+      // this.borderColor = object.borderColor;
+      // this.borderColorSelected = object.borderColorSelected;
+      // this.titleTextColor = object.titleTextColor;
+      // this.titleBarColor = object.titleBarColor;
+      // this.titleBarFillOpacity = object.titleBarFillOpacity;
+      // this.titleBarTopLeftAreaColor = object.titleBarTopLeftAreaColor;
+      // this.titleBarTopLeftAreaFillOpacity =
+      //   object.titleBarTopLeftAreaFillOpacity;
+      // this.titleBarTopLeftAreaSeparatorColor =
+      //   object.titleBarTopLeftAreaSeparatorColor;
+      // this.titleBarTopLeftAreaSeparatorFillOpacity =
+      //   object.titleBarTopLeftAreaSeparatorFillOpacity;
+      // this.deletable = object.deletable;
+      // this.configurable = object.configurable;
+      // this.topLeftArea = object.topLeftArea;
+      // this.topLeftAreaContent = object.topLeftAreaContent;
+      // this.configureButtonColor = object.configureButtonColor;
+      // this.readOnly = object.readOnly;
+    } else {
+      this.title = object;
+    }
+
+    if (this.id === null || typeof this.id === "undefined") {
+      this.id = generateId();
+    }
+
     this.recalculateNodeWidth();
   }
 
@@ -113,20 +158,51 @@ class DiagramNode {
     };
 
     if (typeof object === "object") {
-      newPort.object = object;
-      newPort.name = object.title;
-      newPort.deletable = object.deletable;
-      newPort.editable = object.editable;
-      newPort.isASpacer = object.isASpacer;
-      newPort.fontSize = object.fontSize;
-      newPort.fontFamily = object.fontFamily;
-      newPort.connectorCategory = object.connectorCategory;
-      newPort.connectorCategoryTextColor = object.connectorCategoryTextColor;
-      newPort.connectorCategoryTagColor = object.connectorCategoryTagColor;
-      newPort.connectorCategoryTagColorHover =
-        object.connectorCategoryTagColorHover;
-      newPort.connectorNameTagColor = object.connectorNameTagColor;
-      newPort.connectorNameTextColor = object.connectorNameTextColor;
+      if (typeof object.id !== "undefined" && object.id !== null) {
+        newPort.id = object.id;
+      }
+
+      const propertiesToMoveIn = [
+        "title",
+        "deletable",
+        "editable",
+        "isASpacer",
+        "fontSize",
+        "fontFamily",
+        "connectorCategory",
+        "connectorCategoryTextColor",
+        "connectorCategoryTagColor",
+        "connectorCategoryTagColorHover",
+        "connectorNameTagColor",
+        "connectorNameTextColor"
+      ];
+
+      this.object = {};
+      for (var objectItem in object) {
+        if (propertiesToMoveIn.indexOf(objectItem) >= 0) {
+          // objectItem IS in propertiesToMoveIn
+          newPort[objectItem] = object[objectItem];
+        } else {
+          // objectItem IS NOT in propertiesToMoveIn
+          this.object[objectItem] = object[objectItem];
+        }
+      }
+      newPort.name = newPort.title;
+
+      // newPort.object = object;
+      // newPort.name = object.title;
+      // newPort.deletable = object.deletable;
+      // newPort.editable = object.editable;
+      // newPort.isASpacer = object.isASpacer;
+      // newPort.fontSize = object.fontSize;
+      // newPort.fontFamily = object.fontFamily;
+      // newPort.connectorCategory = object.connectorCategory;
+      // newPort.connectorCategoryTextColor = object.connectorCategoryTextColor;
+      // newPort.connectorCategoryTagColor = object.connectorCategoryTagColor;
+      // newPort.connectorCategoryTagColorHover =
+      //   object.connectorCategoryTagColorHover;
+      // newPort.connectorNameTagColor = object.connectorNameTagColor;
+      // newPort.connectorNameTextColor = object.connectorNameTextColor;
     } else {
       newPort.name = object;
     }
