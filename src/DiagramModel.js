@@ -158,7 +158,18 @@ class DiagramModel {
    * @param  {Object} serializedModel
    */
   deserialize(serializedModel) {
+    // deserialise from JSON data
     this._model = JSON.parse(serializedModel);
+    // Prepare a dummy node...
+    const dummyNode = new DiagramNode("", "", 0, 0, 0, 0);
+    // ...to apply its prototype to any node freshly deserialised
+    if (this._model && this._model.nodes && this._model.nodes.length >= 1) {
+      this._model.nodes.forEach(node => {
+        if (typeof node.addOutPort === "undefined") {
+          Object.setPrototypeOf(node, dummyNode);
+        }
+      });
+    }
   }
 }
 
