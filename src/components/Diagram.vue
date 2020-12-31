@@ -23,7 +23,7 @@
       :height="(fitFlexbox ? '100%' : height)"
       preserveAspectRatio="xMinYMin meet"
       class="svg-content"
-      ref="dragramRoot"
+      ref="diagramRoot"
       @mousemove="mouseMove"
       @mouseup="mouseUp">
       <defs>
@@ -307,6 +307,7 @@ export default {
 
     registerSvgPanZoom(svgPanZoom) {
       this.svgPanZoom = svgPanZoom;
+      this.$emit("onRegisterSvgPanZoom", this.svgPanZoom);
     },
 
     center() {
@@ -339,6 +340,7 @@ export default {
 
     clearSelection() {
       this.selectedItem = {};
+      this.$emit("selectNode", null, null);
     },
 
     updateLinksPositions() {
